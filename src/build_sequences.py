@@ -8,19 +8,11 @@ chunked into sequences, split chronologically into train/val/test.
 Pipeline:
   1. Load each cleaned day-file
   2. Group flows into fixed-size time windows (default: 30 seconds)
-  3. Aggregate each window into one "state vector" (mean of numeric features
-     + flow count + attack ratio + majority label)
+  3. Aggregate each window into one "state vector"
   4. Build sliding sequences of consecutive windows (default length: 10)
-     -> X = past 10 window-states, y = label of the NEXT window (forecasting)
-  5. Split chronologically per day (70% train / 15% val / 15% test) to avoid
-     leaking future information into training
+  5. Split chronologically per day (70% train / 15% val / 15% test)
   6. Scale features (fit scaler on train only, apply to val/test)
   7. Save everything as compressed .npz + a scaler + label encoder + metadata
-
-Designed to be safe to re-run: if one file fails, it's skipped with a clear
-message and the rest continue. Every intermediate check has a guard against
-empty/degenerate input so it fails loudly and clearly instead of silently
-producing a broken dataset.
 """
 
 import pandas as pd
@@ -44,34 +36,53 @@ VAL_FRAC = 0.15
 
 NON_FEATURE_COLS = ['Timestamp', 'Label']
 
-
 # ---------------------------------------------------------------------------
-# STEP 1: TIME WINDOWING + STATE VECTORS
+# STEP 1: TIME WINDOWING + STATE VECTORS (HIGH-PERFORMANCE VECTORIZED)
 # ---------------------------------------------------------------------------
 def build_state_vectors(df):
     """Group flows into fixed time windows and aggregate each into one
-    'network state vector' row. Returns (state_df, feature_cols)."""
+    'network state vector' row using optimized C-level operations."""
     df = df.sort_values('Timestamp').reset_index(drop=True)
 
     if df['Timestamp'].isna().any():
         raise ValueError("Found NaT in Timestamp column - clean_data.py should have removed these")
 
     t0 = df['Timestamp'].min()
-    df = df.copy()
     df['window_id'] = ((df['Timestamp'] - t0).dt.total_seconds() // WINDOW_SECONDS).astype(int)
 
     feature_cols = [c for c in df.columns if c not in NON_FEATURE_COLS + ['window_id']]
     if not feature_cols:
         raise ValueError("No feature columns found after excluding Timestamp/Label/window_id")
 
+    # 1. Fast numeric aggregation
     grouped = df.groupby('window_id')
-
     agg = grouped[feature_cols].mean()
-    agg['flow_count'] = grouped.size()
-    agg['attack_ratio'] = grouped['Label'].apply(lambda s: (s != 'Benign').mean())
-    agg['majority_label'] = grouped['Label'].agg(lambda s: s.value_counts().idxmax())
-    agg['window_start_time'] = grouped['Timestamp'].min()
+    window_sizes = grouped.size()
+    agg['flow_count'] = window_sizes
+    
+    # 2. Isolate Threats to bypass the bottleneck
+    attacks_only = df[df['Label'] != 'Benign']
+    
+    if not attacks_only.empty:
+        # Fast attack ratio math
+        attack_counts = attacks_only.groupby('window_id').size()
+        agg['attack_ratio'] = (attack_counts / window_sizes).fillna(0.0)
+        
+        # --- ZERO-TOLERANCE THREAT MAPPING (>0% THRESHOLD) ---
+        # Group by window and label, count occurrences, sort to find the highest, and drop duplicates.
+        # This completely avoids the slow .apply() loop.
+        attack_freq = attacks_only.groupby(['window_id', 'Label']).size().reset_index(name='count')
+        attack_freq = attack_freq.sort_values(['window_id', 'count'], ascending=[True, False])
+        dominant_attacks = attack_freq.drop_duplicates(subset=['window_id']).set_index('window_id')['Label']
+        
+        # Map the dominant attacks back to the main timeline. Empty windows default to Benign.
+        agg['majority_label'] = agg.index.map(dominant_attacks).fillna('Benign')
+    else:
+        # If the file is perfectly clean, bypass math entirely
+        agg['attack_ratio'] = 0.0
+        agg['majority_label'] = 'Benign'
 
+    agg['window_start_time'] = grouped['Timestamp'].min()
     agg = agg.reset_index().sort_values('window_id').reset_index(drop=True)
 
     # Sanity check: no NaNs should exist in the final aggregated table
@@ -81,16 +92,14 @@ def build_state_vectors(df):
 
     return agg, feature_cols
 
-
 # ---------------------------------------------------------------------------
-# STEP 2: BUILD SEQUENCES (forecasting: predict the NEXT window's label)
+# STEP 2: BUILD SEQUENCES
 # ---------------------------------------------------------------------------
 def build_sequences(state_df, feature_cols, seq_len=SEQUENCE_LENGTH):
-    """From a chronological state-vector table, build sliding sequences.
-    X[i] = seq_len consecutive window feature-vectors
-    y[i] = majority_label of the window immediately AFTER the sequence
-    """
-    all_feature_cols = feature_cols + ['flow_count', 'attack_ratio']
+    """From a chronological state-vector table, build sliding sequences."""
+    # --- FIX 1: DROP ATTACK_RATIO FROM LSTM INPUT ---
+    all_feature_cols = feature_cols + ['flow_count']
+    
     feature_matrix = state_df[all_feature_cols].to_numpy(dtype=np.float32)
     labels = state_df['majority_label'].to_numpy()
 
@@ -108,9 +117,8 @@ def build_sequences(state_df, feature_cols, seq_len=SEQUENCE_LENGTH):
 
     return X, y
 
-
 # ---------------------------------------------------------------------------
-# STEP 3: CHRONOLOGICAL SPLIT (per day, to avoid leakage)
+# STEP 3: CHRONOLOGICAL SPLIT 
 # ---------------------------------------------------------------------------
 def chrono_split(X, y):
     n = len(X)
@@ -120,18 +128,11 @@ def chrono_split(X, y):
             X[train_end:val_end], y[train_end:val_end],
             X[val_end:], y[val_end:])
 
-
 def safe_concat(list_of_arrays, name):
-    """Concatenate a list of numpy arrays, with a clear error if it's empty."""
     non_empty = [a for a in list_of_arrays if len(a) > 0]
     if not non_empty:
-        raise RuntimeError(
-            f"No data collected for '{name}'. All input files may have failed "
-            f"or produced too few windows for SEQUENCE_LENGTH={SEQUENCE_LENGTH}. "
-            f"Check the per-file logs above."
-        )
+        raise RuntimeError(f"No data collected for '{name}'. Check the per-file logs above.")
     return np.concatenate(non_empty, axis=0)
-
 
 # ---------------------------------------------------------------------------
 # MAIN
@@ -143,8 +144,7 @@ def main():
         print(f"ERROR: {PROCESSED_DIR} does not exist. Run clean_data.py first.")
         sys.exit(1)
 
-    files = sorted(f for f in os.listdir(PROCESSED_DIR)
-                    if f.startswith("cleaned_") and f.endswith(".csv"))
+    files = sorted(f for f in os.listdir(PROCESSED_DIR) if f.startswith("cleaned_") and f.endswith(".csv"))
 
     if not files:
         print(f"ERROR: No cleaned_*.csv files found in {PROCESSED_DIR}. Run clean_data.py first.")
@@ -173,10 +173,7 @@ def main():
             if feature_cols_reference is None:
                 feature_cols_reference = feature_cols
             elif feature_cols != feature_cols_reference:
-                raise ValueError(
-                    f"Column mismatch: {fname} has different features than "
-                    f"previous files. All cleaned files must have identical columns."
-                )
+                raise ValueError("Column mismatch: All cleaned files must have identical columns.")
 
             print(f"  {len(df)} flows -> {len(state_df)} time windows ({WINDOW_SECONDS}s each)")
 
@@ -193,7 +190,6 @@ def main():
 
             print(f"  Sequences -> train:{len(X_tr)} val:{len(X_va)} test:{len(X_te)}\n")
             files_processed += 1
-
             del df, state_df, X, y
 
         except Exception as e:
@@ -202,10 +198,7 @@ def main():
             continue
 
     print(f"Files processed successfully: {files_processed}/{len(files)}")
-    if files_failed:
-        print(f"Files that failed: {files_failed}")
-
-    # ---- Combine all days together (with clear errors if something's empty) ----
+    
     X_train = safe_concat(all_X_train, "X_train")
     y_train = safe_concat(all_y_train, "y_train")
     X_val = safe_concat(all_X_val, "X_val")
@@ -216,10 +209,6 @@ def main():
     print(f"\nTOTAL -> train:{X_train.shape} val:{X_val.shape} test:{X_test.shape}")
 
     # ---- Guard against inf/extreme values before scaling ----
-    # Some flow-rate features (e.g. Flow Byts/s) can produce very large means
-    # when Flow Duration is tiny, which can overflow float32 during scaling.
-    # Replace inf with NaN, then clip each feature to a safe finite range
-    # based on percentiles computed from the TRAIN split only (no leakage).
     n_features = X_train.shape[2]
 
     def replace_inf_with_nan(X):
@@ -232,10 +221,8 @@ def main():
     X_test = replace_inf_with_nan(X_test)
 
     flat_train = X_train.reshape(-1, n_features)
-    # Per-feature 1st/99th percentile computed ignoring NaNs, from train only
     lower = np.nanpercentile(flat_train, 1, axis=0)
     upper = np.nanpercentile(flat_train, 99, axis=0)
-    # Per-feature median, used to fill any remaining NaNs (from original inf values)
     median = np.nanmedian(flat_train, axis=0)
 
     def clip_and_fill(X):
@@ -253,16 +240,12 @@ def main():
     X_val = clip_and_fill(X_val)
     X_test = clip_and_fill(X_test)
 
-    n_inf_fixed = int((~np.isfinite(X_train)).sum())  # should be 0 now, sanity check
-    print(f"Post-clip sanity check - remaining non-finite values in X_train: {n_inf_fixed}")
-
-    # ---- Scale features (fit on train only, to avoid leakage) ----
+    # ---- Scale features (fit on train only) ----
     scaler = StandardScaler()
     scaler.fit(X_train.reshape(-1, n_features))
 
     def scale(X):
-        if len(X) == 0:
-            return X
+        if len(X) == 0: return X
         shape = X.shape
         return scaler.transform(X.reshape(-1, n_features)).reshape(shape).astype(np.float32)
 
@@ -270,8 +253,7 @@ def main():
     X_val_scaled = scale(X_val)
     X_test_scaled = scale(X_test)
 
-    # ---- Encode labels (text -> integer). Fit on the union of all splits so
-    # every label seen anywhere has a stable, consistent integer code. ----
+    # ---- Encode labels ----
     label_encoder = LabelEncoder()
     label_encoder.fit(np.concatenate([y_train, y_val, y_test]))
     y_train_enc = label_encoder.transform(y_train)
@@ -292,11 +274,10 @@ def main():
     metadata = {
         "window_seconds": WINDOW_SECONDS,
         "sequence_length": SEQUENCE_LENGTH,
-        "feature_columns_order": feature_cols_reference + ["flow_count", "attack_ratio"],
+        "feature_columns_order": feature_cols_reference + ["flow_count"],
         "n_features": n_features,
         "label_classes": label_encoder.classes_.tolist(),
         "files_processed": files_processed,
-        "files_failed": files_failed,
         "shapes": {
             "X_train": list(X_train_scaled.shape),
             "X_val": list(X_val_scaled.shape),
@@ -308,7 +289,6 @@ def main():
 
     print(f"\nSaved dataset.npz, scaler.joblib, label_encoder.joblib, metadata.json to {OUTPUT_DIR}")
     print("Done.")
-
 
 if __name__ == "__main__":
     main()

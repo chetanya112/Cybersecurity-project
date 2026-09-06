@@ -72,38 +72,42 @@
     "Idle Std",
     "Idle Max",
     "Idle Min",
-    "flow_count",
-    "attack_ratio"
+    "flow_count"
   ],
-  "n_features": 72,
+  "n_features": 71,
   "label_classes": [
     "Benign",
     "Bot",
+    "Brute Force -Web",
+    "Brute Force -XSS",
     "DDOS attack-HOIC",
     "DDOS attack-LOIC-UDP",
+    "DDoS attacks-LOIC-HTTP",
     "DoS attacks-GoldenEye",
     "DoS attacks-Hulk",
     "DoS attacks-SlowHTTPTest",
+    "DoS attacks-Slowloris",
+    "FTP-BruteForce",
     "Infilteration",
+    "SQL Injection",
     "SSH-Bruteforce"
   ],
   "files_processed": 10,
-  "files_failed": [],
   "shapes": {
     "X_train": [
       6766,
       10,
-      72
+      71
     ],
     "X_val": [
       1451,
       10,
-      72
+      71
     ],
     "X_test": [
       1457,
       10,
-      72
+      71
     ]
   }
 }
