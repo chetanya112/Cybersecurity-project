@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+data/raw/*.csv
+data/processed/cleaned_*.csv
+
+.vscode/
+.DS_Store
+Thumbs.db
