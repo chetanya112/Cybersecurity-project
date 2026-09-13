@@ -1,0 +1,22 @@
+{
+  "description": "LSTM World Model vs Logistic Regression baseline (15-class) on CIC-IDS-2018",
+  "dataset": "D:\\sih26153-data-pipeline\\data\\processed\\model_ready",
+  "n_train": 6766,
+  "n_test": 1457,
+  "results": [
+    {
+      "model": "Logistic Regression (baseline)",
+      "accuracy": 0.72,
+      "macro_f1": 0.1815,
+      "attack_f1": 0.6397,
+      "train_time_s": 214.15
+    },
+    {
+      "model": "LSTM World Model (CHRONEX)",
+      "accuracy": 0.8524,
+      "macro_f1": 0.338,
+      "attack_f1": 0.6491,
+      "train_time_s": "N/A (pre-trained)"
+    }
+  ]
+}

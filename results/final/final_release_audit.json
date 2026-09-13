@@ -1,0 +1,249 @@
+{
+  "part1": {
+    "n_features": 71,
+    "sequence_length": 10,
+    "future_horizon": 10,
+    "feature_count": 71,
+    "label_class_count": 14,
+    "label_classes": [
+      "Benign",
+      "Bot",
+      "Brute Force -Web",
+      "Brute Force -XSS",
+      "DDOS attack-HOIC",
+      "DDOS attack-LOIC-UDP",
+      "DDoS attacks-LOIC-HTTP",
+      "DoS attacks-GoldenEye",
+      "DoS attacks-SlowHTTPTest",
+      "DoS attacks-Slowloris",
+      "FTP-BruteForce",
+      "Infilteration",
+      "SQL Injection",
+      "SSH-Bruteforce"
+    ],
+    "feature_count_matches": true,
+    "label_count_is_14": true,
+    "label_count_note": "metadata has 14 classes (expected 14 unique raw, runtime replaces Infilteration\u2192Infiltration)"
+  },
+  "part2": {
+    "native_clf": {
+      "exists": true,
+      "size_bytes": 281845,
+      "path": "D:\\sih26153-data-pipeline\\models\\phase4\\attack_classifier_protocolA_v1.pt"
+    },
+    "native_fs": {
+      "exists": true,
+      "size_bytes": 1310837,
+      "path": "D:\\sih26153-data-pipeline\\models\\phase4\\state_transition_direct_v1.pt"
+    },
+    "native_scaler": {
+      "exists": true,
+      "size_bytes": 2271,
+      "path": "D:\\sih26153-data-pipeline\\data\\processed\\model_ready_v2_primary\\scaler.joblib"
+    },
+    "native_data": {
+      "exists": true,
+      "size_bytes": 4842583,
+      "path": "D:\\sih26153-data-pipeline\\data\\processed\\model_ready_v2_primary\\dataset.npz"
+    },
+    "native_meta": {
+      "exists": true,
+      "size_bytes": 2009,
+      "path": "D:\\sih26153-data-pipeline\\data\\processed\\model_ready_v2_primary\\metadata.json"
+    },
+    "fb_clf": {
+      "exists": true,
+      "size_bytes": 215013,
+      "path": "D:\\sih26153-data-pipeline\\models\\fallback\\attack_classifier.pt"
+    },
+    "fb_fs": {
+      "exists": true,
+      "size_bytes": 842309,
+      "path": "D:\\sih26153-data-pipeline\\models\\fallback\\state_transition_direct.pt"
+    },
+    "fb_scaler": {
+      "exists": true,
+      "size_bytes": 727,
+      "path": "D:\\sih26153-data-pipeline\\models\\fallback\\scaler.joblib"
+    },
+    "fb_meta": {
+      "exists": true,
+      "size_bytes": 1197,
+      "path": "D:\\sih26153-data-pipeline\\models\\fallback\\metadata.json"
+    }
+  },
+  "part3": {
+    "native_n_features": 71,
+    "native_mean_shape": [
+      71
+    ],
+    "native_scale_shape": [
+      71
+    ],
+    "native_ok": true,
+    "fallback_n_features": 6,
+    "fallback_mean_shape": [
+      6
+    ],
+    "fallback_ok": true
+  },
+  "part4": {
+    "X_train_shape": [
+      6350,
+      10,
+      71
+    ],
+    "X_test_shape": [
+      1190,
+      10,
+      71
+    ],
+    "no_label_in_feature_matrix": true,
+    "adapter_no_mean_imputation": "verified_in_code_review",
+    "service_no_mean_imputation": "WARNING_preprocess_csv_upload_uses_scaler_mean_LEGACY_STREAMLIT_ONLY"
+  },
+  "part5": {
+    "K1_native_shape": [
+      10,
+      71
+    ],
+    "K1_native_ok": true,
+    "K3_native_shape": [
+      10,
+      71
+    ],
+    "K3_native_ok": true,
+    "K5_native_shape": [
+      10,
+      71
+    ],
+    "K5_native_ok": true,
+    "K10_native_shape": [
+      10,
+      71
+    ],
+    "K10_native_ok": true,
+    "K1_fallback_shape": [
+      10,
+      6
+    ],
+    "K1_fallback_ok": true,
+    "K3_fallback_shape": [
+      10,
+      6
+    ],
+    "K3_fallback_ok": true,
+    "K5_fallback_shape": [
+      10,
+      6
+    ],
+    "K5_fallback_ok": true,
+    "K10_fallback_shape": [
+      10,
+      6
+    ],
+    "K10_fallback_ok": true
+  },
+  "part6": {
+    "native_fs_output_shape": [
+      1,
+      10,
+      71
+    ],
+    "native_clf_output_shape": [
+      1,
+      15
+    ],
+    "native_fs_ok": true,
+    "native_clf_ok": true,
+    "native_probs_sum": 0.9999999403953552,
+    "native_probs_finite": true,
+    "native_probs_range_ok": true,
+    "fallback_fs_output_shape": [
+      1,
+      10,
+      6
+    ],
+    "fallback_clf_output_shape": [
+      1,
+      15
+    ],
+    "fallback_fs_ok": true,
+    "fallback_clf_ok_14": false,
+    "fallback_probs_sum": 0.9999999403953552,
+    "fallback_probs_finite": true
+  },
+  "part13": {
+    "probs_sum": 0.9999999403953552,
+    "probs_min": 0.000194855616427958,
+    "probs_max": 0.8747422695159912,
+    "probs_all_finite": true,
+    "probs_no_nan": true,
+    "probs_non_negative": true,
+    "probs_le_one": true,
+    "top3_sorted": true,
+    "p_attack": 0.980883002281189,
+    "p_benign": 0.019116999581456184
+  },
+  "part14": {
+    "traj": [
+      0.9809,
+      0.9829,
+      0.9989,
+      0.9958,
+      0.9965,
+      0.9964,
+      0.9943,
+      0.9862,
+      0.9856,
+      0.9847
+    ],
+    "escalation_score": -0.000802,
+    "escalation_in_range": true,
+    "uses_ground_truth": false
+  },
+  "part22": {
+    "native_label_count": 14,
+    "fallback_label_count": 14,
+    "infilteration_in_native_meta": true,
+    "infilteration_in_fb_meta": true,
+    "runtime_replaces_infilteration": true,
+    "native_labels_after_replace": [
+      "Benign",
+      "Bot",
+      "Brute Force -Web",
+      "Brute Force -XSS",
+      "DDOS attack-HOIC",
+      "DDOS attack-LOIC-UDP",
+      "DDoS attacks-LOIC-HTTP",
+      "DoS attacks-GoldenEye",
+      "DoS attacks-SlowHTTPTest",
+      "DoS attacks-Slowloris",
+      "FTP-BruteForce",
+      "Infiltration",
+      "SQL Injection",
+      "SSH-Bruteforce"
+    ],
+    "fb_labels_after_replace": [
+      "Benign",
+      "Bot",
+      "Brute Force -Web",
+      "Brute Force -XSS",
+      "DDOS attack-HOIC",
+      "DDOS attack-LOIC-UDP",
+      "DDoS attacks-LOIC-HTTP",
+      "DoS attacks-GoldenEye",
+      "DoS attacks-SlowHTTPTest",
+      "DoS attacks-Slowloris",
+      "FTP-BruteForce",
+      "Infiltration",
+      "SQL Injection",
+      "SSH-Bruteforce"
+    ],
+    "labels_match": true
+  },
+  "part24": {
+    "deterministic": true,
+    "max_abs_diff": 0.0
+  }
+}

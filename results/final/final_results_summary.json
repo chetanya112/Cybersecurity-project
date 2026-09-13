@@ -1,0 +1,84 @@
+{
+  "future_state_forecasting": {
+    "model": "Direct Multi-Horizon Future-State Decoder",
+    "input": "(10, 71)",
+    "output": "(10, 71) W+1...W+10",
+    "Protocol_B": {
+      "Persistence_K1_MAE": 0.48474881052970886,
+      "Persistence_K1_RMSE": 1.1042734384536743,
+      "Direct_K1_MAE": 0.3936625123023987,
+      "Direct_K1_RMSE": 0.8017150163650513,
+      "Direct_K10_MAE": 0.4154220521450043,
+      "Direct_K10_RMSE": 0.8359898924827576,
+      "Recursive_K10_MAE": 0.4071812629699707,
+      "Recursive_K10_RMSE": 0.830043375492096
+    }
+  },
+  "attack_forecasting_Protocol_B": {
+    "1": {
+      "Macro_F1": 0.22909684842248831,
+      "Attack_F1": 0.8847926267281107,
+      "Precision": 0.9561752988047809,
+      "Recall": 0.823327615780446,
+      "FPR": 0.021792966815255076
+    },
+    "3": {
+      "Macro_F1": 0.22472391808306838,
+      "Attack_F1": 0.8830328247803976,
+      "Precision": 0.9569138276553106,
+      "Recall": 0.8197424892703863,
+      "FPR": 0.02128712871287129
+    },
+    "5": {
+      "Macro_F1": 0.21803382424254295,
+      "Attack_F1": 0.8764678252700798,
+      "Precision": 0.966839378238342,
+      "Recall": 0.8015463917525774,
+      "FPR": 0.01583374567046017
+    },
+    "10": {
+      "Macro_F1": 0.18507693976472886,
+      "Attack_F1": 0.794906775807185,
+      "Precision": 0.8428158148505304,
+      "Recall": 0.7521514629948365,
+      "FPR": 0.0805734058329214
+    }
+  },
+  "forecast_lead_time": {
+    "eligible_episodes": 4,
+    "detected_episodes": 2,
+    "detection_rate": 0.5,
+    "median_lead_time_seconds": 30,
+    "note": "Low N: 4 eligible contiguous test episodes"
+  },
+  "attack_trajectory": {
+    "formula": "score = clip(slope*9, -1, +1)",
+    "Protocol_A_attack_mean_score": 0.10037983083308524,
+    "Protocol_A_benign_mean_score": 0.024722564348986394,
+    "Protocol_A_FER": 0.08740894901144641,
+    "Protocol_B_FER": 0.1418629550321199
+  },
+  "temporal_explanation": {
+    "formula": "evidence = 0.5*norm(|SHAP|) + 0.5*norm(|Z-change|)",
+    "IMPORTANT": "NOT causal. Ranking only.",
+    "Protocol_A_atk_mean_ev": 0.20174323650074474,
+    "Protocol_A_ben_mean_ev": 0.22909271125356656
+  },
+  "calibration": {
+    "definition": "P(Attack) = 1 - P(Benign)",
+    "Protocol_A": {
+      "brier": 0.06244591329733872,
+      "ece": 0.07730427172833255,
+      "mace": 0.1972472292538921,
+      "hc_precision": 0.9818181818181818,
+      "hc_recall": 0.7074235807860262
+    },
+    "Protocol_B": {
+      "brier": 0.062061807391684744,
+      "ece": 0.0354254762169845,
+      "mace": 0.08319451352840221,
+      "hc_precision": 0.9882226980728052,
+      "hc_recall": 0.7915951972555746
+    }
+  }
+}

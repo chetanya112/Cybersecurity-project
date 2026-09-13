@@ -1,0 +1,13 @@
+{
+  "artifacts": "PASS",
+  "schema": "PASS",
+  "feature_order": "PASS",
+  "k1_k3_k5_k10": "PASS",
+  "leakage": "PASS",
+  "numerical": "PASS",
+  "eval_artifacts": "PASS",
+  "final_demo": "PASS",
+  "feature_hash": "3541d5ba96d6bc1342bf6d48929a003d",
+  "n_classes_model": 15,
+  "n_label_strings_metadata": 14
+}

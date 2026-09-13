@@ -1,0 +1,97 @@
+{
+  "eligible_episodes": 4,
+  "records": [
+    {
+      "episode_id": 0,
+      "attack_class": "FTP-BruteForce",
+      "binary_lead_times": {
+        "1": 30,
+        "3": 30,
+        "5": 30,
+        "10": 30
+      },
+      "exact_lead_times": {
+        "1": null,
+        "3": null,
+        "5": null,
+        "10": null
+      },
+      "threshold_lead_times": {
+        "0.5": 30,
+        "0.7": 30,
+        "0.8": 30,
+        "0.9": 30,
+        "0.95": 30
+      }
+    },
+    {
+      "episode_id": 1,
+      "attack_class": "DoS attacks-Slowloris",
+      "binary_lead_times": {
+        "1": null,
+        "3": null,
+        "5": null,
+        "10": null
+      },
+      "exact_lead_times": {
+        "1": null,
+        "3": null,
+        "5": null,
+        "10": null
+      },
+      "threshold_lead_times": {
+        "0.5": null,
+        "0.7": null,
+        "0.8": null,
+        "0.9": null,
+        "0.95": null
+      }
+    },
+    {
+      "episode_id": 2,
+      "attack_class": "Infiltration",
+      "binary_lead_times": {
+        "1": null,
+        "3": null,
+        "5": null,
+        "10": null
+      },
+      "exact_lead_times": {
+        "1": null,
+        "3": null,
+        "5": null,
+        "10": null
+      },
+      "threshold_lead_times": {
+        "0.5": null,
+        "0.7": null,
+        "0.8": null,
+        "0.9": null,
+        "0.95": null
+      }
+    },
+    {
+      "episode_id": 3,
+      "attack_class": "Bot",
+      "binary_lead_times": {
+        "1": 30,
+        "3": 30,
+        "5": 30,
+        "10": 30
+      },
+      "exact_lead_times": {
+        "1": 30,
+        "3": 30,
+        "5": 30,
+        "10": 30
+      },
+      "threshold_lead_times": {
+        "0.5": 30,
+        "0.7": 30,
+        "0.8": 30,
+        "0.9": 30,
+        "0.95": 30
+      }
+    }
+  ]
+}

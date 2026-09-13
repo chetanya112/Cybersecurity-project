@@ -1,0 +1,20 @@
+{
+  "Protocol A": {
+    "name": "Protocol A",
+    "atk_mean_ev": 0.20174323650074474,
+    "ben_mean_ev": 0.22909271125356656,
+    "atk_mean_shap": 0.01919105016910425,
+    "ben_mean_shap": 0.0068084559938965845,
+    "atk_mean_abs_change": 288125.4375,
+    "ben_mean_abs_change": 394575.375
+  },
+  "Protocol B": {
+    "name": "Protocol B",
+    "atk_mean_ev": 0.1980951869143878,
+    "ben_mean_ev": 0.2116846787674717,
+    "atk_mean_shap": 0.016816490205579338,
+    "ben_mean_shap": 0.0070728650735872,
+    "atk_mean_abs_change": 424101.59375,
+    "ben_mean_abs_change": 554442.75
+  }
+}

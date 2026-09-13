@@ -1,0 +1,46 @@
+{
+    "engine": "fallback",
+    "feature_count": 6,
+    "feature_names": [
+        "Dst Port",
+        "Protocol",
+        "Flow Duration",
+        "Tot Fwd Pkts",
+        "Tot Bwd Pkts",
+        "TotLen Fwd Pkts"
+    ],
+    "sequence_length": 10,
+    "window_seconds": 30,
+    "label_mapping": {
+        "Benign": 0,
+        "Bot": 1,
+        "Brute Force -Web": 2,
+        "Brute Force -XSS": 3,
+        "DDOS attack-HOIC": 4,
+        "DDOS attack-LOIC-UDP": 5,
+        "DDoS attacks-LOIC-HTTP": 6,
+        "DoS attacks-GoldenEye": 7,
+        "DoS attacks-SlowHTTPTest": 8,
+        "DoS attacks-Slowloris": 9,
+        "FTP-BruteForce": 10,
+        "Infilteration": 11,
+        "SQL Injection": 12,
+        "SSH-Bruteforce": 13
+    },
+    "label_classes": [
+        "Benign",
+        "Bot",
+        "Brute Force -Web",
+        "Brute Force -XSS",
+        "DDOS attack-HOIC",
+        "DDOS attack-LOIC-UDP",
+        "DDoS attacks-LOIC-HTTP",
+        "DoS attacks-GoldenEye",
+        "DoS attacks-SlowHTTPTest",
+        "DoS attacks-Slowloris",
+        "FTP-BruteForce",
+        "Infilteration",
+        "SQL Injection",
+        "SSH-Bruteforce"
+    ]
+}

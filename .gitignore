@@ -2,9 +2,33 @@ __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
 
+# Raw and cleaned large data files
 data/raw/*.csv
 data/processed/cleaned_*.csv
 
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Temporary uploads (never commit)
+data/temp_uploads/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Environment files
+.env
+.env.local
+
+# IDE
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Scratch and Large Arrays
+scratch/
+data/processed/**/dataset.npz
+data/processed/*/dataset.npz
+dataset.npz
