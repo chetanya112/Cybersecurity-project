@@ -29,6 +29,3 @@ Thumbs.db
 
 # Scratch and Large Arrays
 scratch/
-data/processed/**/dataset.npz
-data/processed/*/dataset.npz
-dataset.npz
